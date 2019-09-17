@@ -1,1 +1,0 @@
-# fiskaly-kassensichv-client-dotnet
