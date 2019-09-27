@@ -44,7 +44,7 @@ namespace Fiskaly.Client
                   var innerResponse = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
                   return innerResponse;
               }
-            );
+            ).ConfigureAwait(false);
 
             return response;
         }

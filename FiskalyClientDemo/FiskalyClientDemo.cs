@@ -3,6 +3,7 @@ using System.Net.Http;
 using Fiskaly.Client;
 using Serilog;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Fiskaly.Client
 {
@@ -17,40 +18,48 @@ namespace Fiskaly.Client
             return new StringContent(payload, Encoding.UTF8, "application/json");
         }
 
-        public static string CreateTss()
+        public static async Task<String> CreateTss()
         {
             Log.Information("creating tss...");
             var tssGuid = Guid.NewGuid().ToString();
             var url = $"tss/{tssGuid}";
             var payload = $"{{\"description\": \"{tssGuid}\", \"state\": \"INITIALIZED\"}}";
-            return client
+
+            HttpResponseMessage response = await client
               .PutAsync(url, Content(payload))
-              .Result
-              .Content
+              .ConfigureAwait(false);
+
+            String content = await response.Content
               .ReadAsStringAsync()
-              .Result;
+              .ConfigureAwait(false);
+
+            return content;
         }
 
-        public static string ListTss()
+        public static async Task<String> ListTss()
         {
             Log.Information("listing tss...");
-            return client
+
+            HttpResponseMessage response = await client
               .GetAsync("tss")
-              .Result
-              .Content
+              .ConfigureAwait(false);
+
+            String content = await response.Content
               .ReadAsStringAsync()
-              .Result;
+              .ConfigureAwait(false);
+
+            return content;
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
               .WriteTo.Console()
               .CreateLogger();
 
-            client = ClientFactory.Create(ApiKey, ApiSecret);
-            var createTssResponse = CreateTss();
-            var listTssResponse = ListTss();
+            client = await ClientFactory.Create(ApiKey, ApiSecret).ConfigureAwait(false);
+            var createTssResponse = await CreateTss().ConfigureAwait(false);
+            var listTssResponse = await ListTss().ConfigureAwait(false);
             Log.Information("createTssResponse: {Response}", createTssResponse);
             Log.Information("listTssResponse: {Response}", listTssResponse);
         }

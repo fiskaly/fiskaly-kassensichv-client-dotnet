@@ -15,6 +15,7 @@
     <Content Include="..\FiskalySma\dist\com.fiskaly.kassensichv.sma-windows-amd64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
   </ItemGroup>
 
 </Project>
