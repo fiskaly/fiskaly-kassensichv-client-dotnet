@@ -38,7 +38,7 @@ namespace Fiskaly.Client.Test.RequestUriEnforcementHandlerTest
             Assert.ThrowsAsync<InvalidRequestUriException>(
               async () =>
               {
-                  await invoker.SendAsync(httpRequestMessage, CancellationToken.None);
+                  await invoker.SendAsync(httpRequestMessage, CancellationToken.None).ConfigureAwait(false);
               }
             );
         }
@@ -51,7 +51,7 @@ namespace Fiskaly.Client.Test.RequestUriEnforcementHandlerTest
             Assert.DoesNotThrowAsync(
               async () =>
               {
-                  await invoker.SendAsync(httpRequestMessage, CancellationToken.None);
+                  await invoker.SendAsync(httpRequestMessage, CancellationToken.None).ConfigureAwait(false);
               }
             );
         }

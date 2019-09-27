@@ -36,14 +36,17 @@ namespace Fiskaly.Client
             };
 
             _authenticationContext = new AuthenticationContext();
+        }
 
+        public async Task Start()
+        {
             Log.Information("waiting for auth response...");
-            FetchToken().Wait();
+            await FetchToken().ConfigureAwait(false);
 
             Log.Information("starting periodic token refresh...");
             _cancellationTokenSource = new CancellationTokenSource();
             var token = _cancellationTokenSource.Token;
-            Task.Run(() => PeriodicTokenRefresh(token), token);
+            _ = Task.Run(async () => await PeriodicTokenRefresh(token).ConfigureAwait(false), token); // discard to avoid warning CS4014
         }
 
         protected async Task FetchToken()
@@ -72,7 +75,7 @@ namespace Fiskaly.Client
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 Log.Information("parsing token...");
-                var result = await response.Content.ReadAsStringAsync();
+                var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var obj = JObject.Parse(result);
                 _authenticationContext.AccessToken = (string)obj["access_token"];
                 _authenticationContext.RefreshToken = (string)obj["refresh_token"];
@@ -88,7 +91,7 @@ namespace Fiskaly.Client
                 else
                 {
                     Log.Information("refresh token no longer valid.");
-                    await RestartPeriodicTokenRefresh();
+                    await RestartPeriodicTokenRefresh().ConfigureAwait(false);
                 }
             }
             else
@@ -101,14 +104,14 @@ namespace Fiskaly.Client
         {
             try
             {
-                await _semaphore.WaitAsync();
+                await _semaphore.WaitAsync().ConfigureAwait(false);
                 Log.Information("restarting periodic token refresh...");
                 _cancellationTokenSource.Cancel();
                 _authenticationContext = new AuthenticationContext();
-                await FetchToken();
+                await FetchToken().ConfigureAwait(false);
                 _cancellationTokenSource = new CancellationTokenSource();
                 var token = _cancellationTokenSource.Token;
-                _ = Task.Run(() => PeriodicTokenRefresh(token), token); // discard to avoid warning CS4014
+                _ = Task.Run(async () => await PeriodicTokenRefresh(token).ConfigureAwait(false), token); // discard to avoid warning CS4014
             }
             finally
             {
@@ -120,8 +123,8 @@ namespace Fiskaly.Client
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(_authenticationContext.RefreshInterval), cancellationToken);
-                await FetchToken();
+                await Task.Delay(TimeSpan.FromMilliseconds(_authenticationContext.RefreshInterval), cancellationToken).ConfigureAwait(false);
+                await FetchToken().ConfigureAwait(false);
             }
         }
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -131,7 +134,7 @@ namespace Fiskaly.Client
 
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                await RestartPeriodicTokenRefresh();
+                await RestartPeriodicTokenRefresh().ConfigureAwait(false);
             }
 
             return response;

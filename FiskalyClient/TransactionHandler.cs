@@ -22,7 +22,7 @@ namespace Fiskaly.Client
         private async Task InterceptTxRequest(HttpRequestMessage request)
         {
             Log.Information("intercepting tx request...");
-            var body = await request.Content.ReadAsStringAsync();
+            var body = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
             Log.Information("body of tx request: {Body}", body);
             var smaResponse = Sma.SignTx(body);
             Log.Information("SMA reponse: {SmaReponse}", smaResponse);
@@ -51,7 +51,7 @@ namespace Fiskaly.Client
         {
             if (request.Method == HttpMethod.Put && Regex.IsMatch(request.RequestUri.OriginalString, "\\/tss\\/.+\\/tx\\/.+"))
             {
-                await InterceptTxRequest(request);
+                await InterceptTxRequest(request).ConfigureAwait(false);
             }
 
             HttpResponseMessage response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);

@@ -19,32 +19,36 @@ namespace Fiskaly.Client.Test
             return new StringContent(payload, Encoding.UTF8, "application/json");
         }
 
-        public string CreateTss(string tssGuid)
+        public async Task<String> CreateTss(string tssGuid)
         {
             Log.Information("creating tss...");
             var url = $"tss/{tssGuid}";
             var payload = $"{{\"description\": \"{tssGuid}\", \"state\": \"INITIALIZED\"}}";
-            var response = client.PutAsync(url, Content(payload)).Result;
+            var response = await client.PutAsync(url, Content(payload)).ConfigureAwait(false);
             Log.Information("response: {@Response}", response);
-            return response.Content.ReadAsStringAsync().Result;
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
-        public string CreateClient(string tssGuid, string clientGuid)
+        public async Task<String> CreateClient(string tssGuid, string clientGuid)
         {
             var url = $"tss/{tssGuid}/client/{clientGuid}";
             var payload = $"{{\"serial_number\": \"{clientGuid}\"}}";
-            return client.PutAsync(url, Content(payload)).Result.Content.ReadAsStringAsync().Result;
+            var response = await client.PutAsync(url, Content(payload)).ConfigureAwait(false);
+            Log.Information("response: {@Response}", response);
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
-        public string CreateTx(string tssGuid, string clientGuid, string txGuid)
+        public async Task<String> CreateTx(string tssGuid, string clientGuid, string txGuid)
         {
             var url = $"tss/{tssGuid}/tx/{txGuid}?last_revision=0";
             var payload = $"{{\"type\": \"OTHER\", \"data\": {{ \"binary\": \"test\" }}, \"state\": \"ACTIVE\", \"client_id\": \"{clientGuid}\"}}";
-            return client.PutAsync(url, Content(payload)).Result.Content.ReadAsStringAsync().Result;
+            var response = await client.PutAsync(url, Content(payload)).ConfigureAwait(false);
+            Log.Information("response: {@Response}", response);
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
         [SetUp]
-        public void Setup()
+        public async Task Setup()
         {
             Log.Information("logging setup...");
             Log.Logger = new LoggerConfiguration()
@@ -54,14 +58,14 @@ namespace Fiskaly.Client.Test
             Log.Information("client setup...");
             var apiKey = Environment.GetEnvironmentVariable("API_KEY");
             var apiSecret = Environment.GetEnvironmentVariable("API_SECRET");
-            client = ClientFactory.Create(apiKey, apiSecret);
+            client = await ClientFactory.Create(apiKey, apiSecret).ConfigureAwait(false);
         }
 
         [Test]
-        public void CreateTss()
+        public async Task CreateTss()
         {
             var tssGuid = Guid.NewGuid().ToString();
-            var response = CreateTss(tssGuid);
+            var response = await CreateTss(tssGuid).ConfigureAwait(false);
 
             var obj = JObject.Parse(response);
             var description = (string)obj["description"];
@@ -72,13 +76,13 @@ namespace Fiskaly.Client.Test
         }
 
         [Test]
-        public void CreateClient()
+        public async Task CreateClient()
         {
             var tssGuid = Guid.NewGuid().ToString();
-            CreateTss(tssGuid);
+            await CreateTss(tssGuid).ConfigureAwait(false);
 
             var clientGuid = Guid.NewGuid().ToString();
-            var response = CreateClient(tssGuid, clientGuid);
+            var response = await CreateClient(tssGuid, clientGuid).ConfigureAwait(false);
 
             var obj = JObject.Parse(response);
             var serial = (string)obj["serial_number"];
@@ -87,16 +91,16 @@ namespace Fiskaly.Client.Test
         }
 
         [Test]
-        public void CreateTx()
+        public async Task CreateTx()
         {
             var tssGuid = Guid.NewGuid().ToString();
-            CreateTss(tssGuid);
+            await CreateTss(tssGuid).ConfigureAwait(false);
 
             var clientGuid = Guid.NewGuid().ToString();
-            CreateClient(tssGuid, clientGuid);
+            await CreateClient(tssGuid, clientGuid).ConfigureAwait(false);
 
             var txGuid = Guid.NewGuid().ToString();
-            var response = CreateTx(tssGuid, clientGuid, txGuid);
+            var response = await CreateTx(tssGuid, clientGuid, txGuid).ConfigureAwait(false);
 
             var obj = JObject.Parse(response);
             var number = (string)obj["number"];

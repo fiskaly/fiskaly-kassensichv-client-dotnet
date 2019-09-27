@@ -44,7 +44,7 @@ namespace Fiskaly.Client.Test.TransactionHandlerTest
                 Encoding.UTF8,
                 "application/json")
             };
-            var httpResponseMessage = await invoker.SendAsync(httpRequestMessage, CancellationToken.None);
+            var httpResponseMessage = await invoker.SendAsync(httpRequestMessage, CancellationToken.None).ConfigureAwait(false);
             Assert.AreEqual(
               $"https://kassensichv.fiskaly.com/api/v0/tss/{tssId}/tx/{txId}/log",
               httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri
@@ -56,7 +56,7 @@ namespace Fiskaly.Client.Test.TransactionHandlerTest
         {
             var invoker = new HttpMessageInvoker(handler);
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "https://kassensichv.fiskaly.com/api/v0/tss");
-            var httpResponseMessage = await invoker.SendAsync(httpRequestMessage, CancellationToken.None);
+            var httpResponseMessage = await invoker.SendAsync(httpRequestMessage, CancellationToken.None).ConfigureAwait(false);
             Assert.AreEqual(
               "https://kassensichv.fiskaly.com/api/v0/tss",
               httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri

@@ -41,57 +41,67 @@ using System.Net.Http;
 using Fiskaly.Client;
 using Serilog;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Fiskaly.Client
 {
-  class Demo
-  {
-    const String ApiKey = "..."; // create your own API key and secret at https://dashboard.fiskaly.com
-    const String ApiSecret = "...";
-    static HttpClient client;
-    public static StringContent Content(string payload)
+    class Demo
     {
-      return new StringContent(payload, Encoding.UTF8, "application/json");
-    }
+        static String ApiKey = Environment.GetEnvironmentVariable("API_KEY"); // create your own API key and secret at https://dashboard.fiskaly.com
+        static String ApiSecret = Environment.GetEnvironmentVariable("API_SECRET");
+        static HttpClient client;
 
-    public static string CreateTss()
-    {
-      Log.Information("creating tss...");
-      var tssGuid = Guid.NewGuid().ToString();
-      var url = $"tss/{tssGuid}";
-      var payload = $"{{\"description\": \"{tssGuid}\", \"state\": \"INITIALIZED\"}}";
-      return client
-        .PutAsync(url, Content(payload))
-        .Result
-        .Content
-        .ReadAsStringAsync()
-        .Result;
-    }
+        public static StringContent Content(string payload)
+        {
+            return new StringContent(payload, Encoding.UTF8, "application/json");
+        }
 
-    public static string ListTss()
-    {
-      Log.Information("listing tss...");
-      return client
-        .GetAsync("tss")
-        .Result
-        .Content
-        .ReadAsStringAsync()
-        .Result;
-    }
+        public static async Task<String> CreateTss()
+        {
+            Log.Information("creating tss...");
+            var tssGuid = Guid.NewGuid().ToString();
+            var url = $"tss/{tssGuid}";
+            var payload = $"{{\"description\": \"{tssGuid}\", \"state\": \"INITIALIZED\"}}";
 
-    static void Main(string[] args)
-    {
-      Log.Logger = new LoggerConfiguration()
-        .WriteTo.Console()
-        .CreateLogger();
+            HttpResponseMessage response = await client
+              .PutAsync(url, Content(payload))
+              .ConfigureAwait(false);
 
-      client = ClientFactory.Create(ApiKey, ApiSecret);
-      var createTssResponse = CreateTss();
-      var listTssResponse = ListTss();
-      Log.Information("createTssResponse: {Response}", createTssResponse);
-      Log.Information("listTssResponse: {Response}", listTssResponse);
+            String content = await response.Content
+              .ReadAsStringAsync()
+              .ConfigureAwait(false);
+
+            return content;
+        }
+
+        public static async Task<String> ListTss()
+        {
+            Log.Information("listing tss...");
+            
+            HttpResponseMessage response = await client
+              .GetAsync("tss")
+              .ConfigureAwait(false);
+
+            String content = await response.Content
+              .ReadAsStringAsync()
+              .ConfigureAwait(false);
+
+            return content;
+        }
+
+        static async Task Main(string[] args)
+        {
+            Log.Logger = new LoggerConfiguration()
+              .WriteTo.Console()
+              .CreateLogger();
+
+            client = await ClientFactory.Create(ApiKey, ApiSecret).ConfigureAwait(false);
+            var createTssResponse = await CreateTss().ConfigureAwait(false);
+            var listTssResponse = await ListTss().ConfigureAwait(false);
+            Log.Information("createTssResponse: {Response}", createTssResponse);
+            Log.Information("listTssResponse: {Response}", listTssResponse);
+        }
     }
-  }
 }
 ```
 

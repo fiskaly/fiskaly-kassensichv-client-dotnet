@@ -42,7 +42,7 @@ namespace Fiskaly.Client
                   innerResponse.EnsureSuccessStatusCode();
                   return innerResponse;
               }
-            );
+            ).ConfigureAwait(false);
 
             return response;
         }
