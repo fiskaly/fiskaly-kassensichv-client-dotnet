@@ -15,8 +15,10 @@ namespace Fiskaly.Client
             Log.Information("creating fiskaly client...");
             var authenticationHandler = new AuthenticationHandler(new HttpClientHandler(), apiKey, apiSecret);
             await authenticationHandler.Start().ConfigureAwait(false);
-            var retryHandler = new PollyHandler(authenticationHandler);
-            var transactionHandler = new TransactionHandler(retryHandler);
+            var pollyHandler = new PollyHandler(authenticationHandler) {
+              Policy = PollyPolicyFactory.CreateGeneralPolicy()
+            };
+            var transactionHandler = new TransactionHandler(pollyHandler);
             var requestUriEnforcementHandler = new RequestUriEnforcementHandler(transactionHandler);
             HttpClient client = new HttpClient(requestUriEnforcementHandler)
             {

@@ -29,8 +29,10 @@ namespace Fiskaly.Client
             _apiSecret = apiSecret;
 
             var httpClientHandler = new HttpClientHandler();
-            var authenticationPollyHandler = new AuthenticationPollyHandler(httpClientHandler);
-            _authenticationClient = new HttpClient(authenticationPollyHandler)
+            var pollyHandler = new PollyHandler(httpClientHandler) {
+              Policy = PollyPolicyFactory.CreateAuthPolicy()
+            };
+            _authenticationClient = new HttpClient(pollyHandler)
             {
                 BaseAddress = new Uri(Constants.BaseAddress),
                 Timeout = Timeout.InfiniteTimeSpan

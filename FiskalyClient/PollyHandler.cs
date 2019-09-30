@@ -14,41 +14,15 @@ namespace Fiskaly.Client
 {
     internal class PollyHandler : DelegatingHandler
     {
-        private AsyncPolicyWrap<HttpResponseMessage> _policy;
+        public AsyncPolicyWrap<HttpResponseMessage> Policy;
         internal PollyHandler(HttpMessageHandler handler)
         {
             base.InnerHandler = handler;
-            SetupPolicies();
         }
 
-        private void SetupPolicies()
-        {
-            Random jitterer = new Random();
-            var retryPolicy = Policy
-              .HandleInner<HttpRequestException>()
-              .Or<TimeoutRejectedException>()
-              .OrResult<HttpResponseMessage>(response => response.StatusCode != HttpStatusCode.OK)
-              .WaitAndRetryForeverAsync(
-                retryAttempt => TimeSpan.FromSeconds(
-                  Math.Min(Math.Pow(2, retryAttempt), Constants.MaxRetryInterval))
-                  + TimeSpan.FromMilliseconds(jitterer.Next(0, 100)
-                ),
-                (exception, timeSpan) =>
-              {
-                  Log.Warning("Request failed with {@Exception}.", exception);
-                  Log.Warning("Waiting {@TimeSpan} before next retry...", timeSpan);
-              });
-
-            var timeoutPolicy = Policy.TimeoutAsync<HttpResponseMessage>(
-              TimeSpan.FromSeconds(Constants.HttpRequestTimeout),
-              TimeoutStrategy.Pessimistic
-            );
-
-            _policy = Policy.WrapAsync(retryPolicy, timeoutPolicy);
-        }
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var response = await _policy.ExecuteAsync(
+            var response = await Policy.ExecuteAsync(
               async () =>
               {
                   Log.Information("sending request to {@Uri}...", request.RequestUri);
