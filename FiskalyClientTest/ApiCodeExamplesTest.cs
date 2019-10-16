@@ -270,9 +270,9 @@ namespace Fiskaly.Client.Test
             String ApiSecret = Environment.GetEnvironmentVariable("API_SECRET");
             HttpClient client = await ClientFactory.Create(ApiKey, ApiSecret).ConfigureAwait(false);
 
-            var tssId = Guid.NewGuid().ToString();
+            // var tssId = "...";
             var url = $"tss/{tssId}";
-            var data = $"{{\"description\": \"\", \"state\": \"INITIALIZED\"}}";
+            var data = $"{{\"state\": \"INITIALIZED\"}}";
             var payload = new StringContent(data, Encoding.UTF8, "application/json");
             HttpResponseMessage response = await client.PutAsync(url, payload).ConfigureAwait(false);
             String content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
