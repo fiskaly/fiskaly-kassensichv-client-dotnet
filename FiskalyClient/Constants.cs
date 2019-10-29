@@ -8,5 +8,6 @@ namespace Fiskaly.Client
         internal const int MaxRetryInterval = 16; // seconds
         internal const int HttpRequestTimeout = 10; // seconds
         internal const string BaseAddress = "https://kassensichv.fiskaly.com/api/v0/";
+        internal const int NumberOfAuthenticationRetryAttempts = 1;
     }
 }
