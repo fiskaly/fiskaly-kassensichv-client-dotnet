@@ -18,7 +18,7 @@ This means you will have to look up the [API documentation](https://docs.microso
 First of all, you have to initialize the required git submodule(s) using:
 
 ```
-$ git submodule update
+$ git submodule update --init
 ```
 
 Then you can build `FiskalyClient` using:
