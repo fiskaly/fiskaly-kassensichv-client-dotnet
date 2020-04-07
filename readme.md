@@ -1,4 +1,8 @@
-# DEPRECATED - fiskaly KassenSichV client for .NET Core - DEPRECATED
+# DEPRECATED - Replaced by [fiskaly SDK Dotnet](https://github.com/fiskaly/fiskaly-sdk-dotnet) - DEPRECATED
+
+Replaced by [this](https://github.com/fiskaly/fiskaly-sdk-dotnet)
+
+# fiskaly KassensichV client for .NET Core
 
 The fiskaly KassenSichV client is an HTTP client that is needed<sup>[1](#fn1)</sup> for accessing the [kassensichv.io](https://kassensichv.io) API that implements a cloud-based, virtual **CTSS** (Certified Technical Security System) / **TSE** (Technische Sicherheitseinrichtung) as defined by the German **KassenSichV** ([Kassen­sich­er­ungsver­ord­nung](https://www.bundesfinanzministerium.de/Content/DE/Downloads/Gesetze/2017-10-06-KassenSichV.pdf)).
 
